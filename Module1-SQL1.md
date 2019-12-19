@@ -36,5 +36,134 @@
     PRIMARY KEY (sid));
     ```
 
+- Primary Keys
+
+    Primary Key column(s)
+    - Provides a unique “lookup key” for the relation
+    - Cannot have any duplicate values
+    - Can be made up of >1 column
+
+    ```
+    CREATE TABLE Boats (
+        bid INTEGER,     	
+        bname CHAR (20), 
+        color CHAR(10), 
+    PRIMARY KEY (bid));
+    ```
+
+    ```
+    CREATE TABLE Reserves (
+        sid INTEGER,      
+        bid INTEGER, 
+        day DATE, 
+    PRIMARY KEY (sid, bid, day);
+    ```
+
+- Foreign Keys
+
+    ```
+    CREATE TABLE Sailors (
+        sid INTEGER,   
+        sname CHAR(20), 
+        rating INTEGER, 
+        age FLOAT
+    );
+
+    CREATE TABLE Boats (
+        bid INTEGER,     	
+        bname CHAR (20), 
+        color CHAR(10), 
+    PRIMARY KEY (bid));
+
+    CREATE TABLE Reserves (
+        sid INTEGER,      
+        bid INTEGER, 
+        day DATE, 
+    PRIMARY KEY (sid, bid, day),
+    FOREIGN KEY (sid) REFERENCES Sailors,
+    FOREIGN KEY (bid) REFERENCES Boats);
+    ```
 
 #### SQL DML
+
+- Basic Single-Table Queries
+
+    ```
+    SELECT [DISTINCT] <column expression list>FROM <single table>[WHERE <predicate>]
+    ```
+
+- SELECT DISTINCT
+
+    ```
+    SELECT DISTINCT S.name, S.gpaFROM students SWHERE S.dept = 'CS'
+    ```
+
+    - DISTINCT specifies removal of duplicate rows before output
+
+    - Can refer to the students table as “S”, this is called an alias
+
+- ORDER BY
+
+    ```
+    SELECT S.name, S.gpa, S.age*2 AS a2FROM Students SWHERE S.dept = 'CS'ORDER BY S.gpa, S.name, a2;
+    ```
+
+    - ORDER BY clause specifies output to be sorted
+        - Lexicographic ordering
+    - Obviously must refer to columns in the output
+        - Note the AS clause for naming output columns!
+
+    ```
+    SELECT  S.name, S.gpa, S.age*2 AS a2FROM Students SWHERE S.dept = 'CS'ORDER BY S.gpa DESC, S.name ASC, a2;
+    ```
+
+    - Ascending order by default, but can be overridden
+        - DESC flag for descending, ASC for ascending
+        - Can mix and match, lexicographically
+
+- LIMIT
+
+    ```
+    SELECT  S.name, S.gpa, S.age*2 AS a2FROM Students SWHERE S.dept = 'CS'ORDER BY S.gpa DESC, S.name ASC, a2LIMIT 3 ;
+    ```
+
+    - Only produces the first <integer> output rows
+    - Typically used with ORDER BY
+        - Otherwise the output is non-deterministic
+        - Not a “pure” declarative construct in that case – output set depends on algorithm for query processing
+
+- Aggregates
+
+    ```
+    SELECT [DISTINCT] AVG(S.gpa)FROM Students SWHERE S.dept = 'CS';
+    ```
+
+    - Before producing output, compute a summary (a.k.a. an aggregate) of some arithmetic expression
+    - Produces 1 row of output
+        - with one column in this case
+    - Other aggregates: SUM, COUNT, MAX, MIN
+
+- GROUP BY
+
+    ```
+    SELECT [DISTINCT] AVG(S.gpa), S.deptFROM Students SGROUP BY S.dept
+    ```
+
+    - Partition table into groups with same GROUP BY column values
+        - Can group by a list of columns
+    - Produce an aggregate result per group
+        - Cardinality of output = # of distinct group values
+    - Note: can put grouping columns in SELECT list
+
+- HAVING
+
+    ```
+    SELECT [DISTINCT] AVG(S.gpa), S.deptFROM Students SGROUP BY S.deptHAVING COUNT(*) > 2
+    ```
+
+    - The HAVING predicate filters groups
+    - HAVING is applied after grouping and aggregation
+        - Hence can contain anything that could go in the SELECT list
+        - I.e. aggs or GROUP BY columns
+    - HAVING can only be used in aggregate queries
+    - It’s an optional clause
